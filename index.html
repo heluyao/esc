@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+</head>
+
+<body>
+<script>
+var ls = {
+	set:function(name,value){
+		return localStorage.setItem(name,value);
+	},
+	get:function(name){
+		return localStorage.getItem(name);
+	},
+	isoffline:function(){
+		return 'onLine'in window.navigator&&!1===window.navigator.onLine
+	}
+}
+function h(d,c){
+	c||(c={});
+	var a=new XMLHttpRequest;
+	d+=(-1==d.indexOf('?')?'?':'&')+'_='+Date.now();
+	a.open('GET',d,!0);
+	a.setRequestHeader&&a.setRequestHeader('X-Requested-With','XMLHttpRequest');
+	a.onreadystatechange=function(){
+		4==a.readyState&&(200!=a.status?c.error&&c.error(a.status,a.responseText):c.success&&c.success(a.responseText))
+	};
+	c.progress&&'function'==typeof a.addEventListener&&a.addEventListener('progress',function(a){c.progress(a)},!1);
+	a.send(null);
+	return a;
+}
+
+var d;
+
+if(!('JSON'in window)){
+	if(d=localStorage.getItem('json2-js')){
+		window.eval(d);
+	}else{
+		h('js/json2.js',{
+			error:function(){
+				window.setTimeout(function(){
+					console.info('error');
+				},1E3)
+			},
+			success:function(a){
+				try{
+					window.eval(a);
+				}catch(c){}
+				ls.set('json2-js',a);
+				
+			}
+		});
+	}
+}
+
+
+if(d=ls.get('test-js')){
+	window['theData'] = JSON.parse(d);
+	window.eval(window['theData'].basejs);
+}else{
+	h('index.php',{
+		error:function(){
+			window.setTimeout(function(){
+				console.info('error');
+			},1E3)
+		},
+		success:function(a){
+			try{
+				window['theData'] = JSON.parse(a);
+				
+				window.eval(window['theData'].basejs);
+				ls.set('test-js',a);
+			}catch(c){}
+			
+		}
+	});
+	h('data.js',{
+		error:function(){
+			window.setTimeout(function(){
+				console.info('error');
+			},1E3)
+		},
+		success:function(a){
+			window['theData2'] = JSON.parse(a);
+			console.info(window['theData2'].length);
+		}
+	});
+}
+</script>
+</body>
+</html>
